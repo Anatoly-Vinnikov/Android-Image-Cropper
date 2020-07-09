@@ -1223,7 +1223,7 @@ public Rect getRotatedCropRect() {
               result.uri,
               result.error,
               getCropPoints(),
-              getCropRect(),
+              getRotatedCropRect(),
               getWholeImageRect(),
               getRotatedDegrees(),
               result.sampleSize);
