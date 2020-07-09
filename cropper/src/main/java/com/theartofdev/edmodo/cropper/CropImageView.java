@@ -658,6 +658,56 @@ public class CropImageView extends FrameLayout {
         mCropOverlayView.getAspectRatioX(),
         mCropOverlayView.getAspectRatioY());
   }
+  
+  /**
+ * Gets the crop window's position relative to the displaying Bitmap (the image displayed in the
+ * CropImageView) rotated using the original image rotation.
+ *
+ * @return a Rect instance containing cropped area boundaries of the displaying Bitmap
+ */
+@SuppressWarnings("SuspiciousNameCombination")
+public Rect getRotatedCropRect() {
+    int loadedSampleSize = mLoadedSampleSize;
+    Bitmap bitmap = mBitmap;
+    if (bitmap == null) {
+        return null;
+    }
+    // get the points of the crop rectangle adjusted to source bitmap
+    float[] points = getCropPoints();
+    int orgWidth = bitmap.getWidth() * loadedSampleSize;
+    int orgHeight = bitmap.getHeight() * loadedSampleSize;
+    // get the rectangle for the points (it may be larger than original if rotation is not stright)
+    Rect rect = BitmapUtils.getRectFromPoints(
+            points,
+            orgWidth,
+            orgHeight,
+            mCropOverlayView.isFixAspectRatio(),
+            mCropOverlayView.getAspectRatioX(),
+            mCropOverlayView.getAspectRatioY());
+    int rotatedLeft = rect.left, rotatedTop = rect.top, rotatedRight = rect.right, rotatedBottom = rect.bottom;
+    switch (mDegreesRotated % 360) {
+        case 90:
+            rotatedLeft = orgHeight - rect.bottom;
+            rotatedTop = rect.left;
+            rotatedRight = rotatedLeft + rect.height();
+            rotatedBottom = rect.right;
+            break;
+        case 180:
+            rotatedLeft = orgWidth - rect.right;
+            rotatedTop = orgHeight - rect.bottom;
+            rotatedRight = rotatedLeft + rect.width();
+            rotatedBottom = orgHeight - rect.top;
+            break;
+        case 270:
+            rotatedLeft = rect.top;
+            rotatedTop = orgWidth - rect.right;
+            rotatedRight = rect.bottom;
+            rotatedBottom = rotatedTop + rect.width();
+            break;
+    }
+    rect.set(new Rect(rotatedLeft, rotatedTop, rotatedRight, rotatedBottom));
+    return rect;
+}
 
   /**
    * Gets the crop window's position relative to the parent's view at screen.
